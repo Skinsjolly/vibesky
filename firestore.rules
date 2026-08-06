@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // NOTE: With the backend architecture, most writes now go through the
+    // Express API using the Firebase Admin SDK, which bypasses these rules
+    // entirely (admin access is always trusted). These rules exist as a
+    // defense-in-depth layer in case any client-side Firestore access is
+    // ever added, and to keep local testing safe.
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if false; // all writes go through backend only
+    }
+
+    match /posts/{postId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+
+      match /comments/{commentId} {
+        allow read: if request.auth != null;
+        allow write: if false;
+      }
+    }
+
+    match /notifications/{notifId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.targetUid;
+      allow write: if false;
+    }
+
+    match /conversations/{convoId} {
+      allow read: if request.auth != null && request.auth.uid in resource.data.participants;
+      allow write: if false;
+
+      match /messages/{messageId} {
+        allow read: if request.auth != null;
+        allow write: if false;
+      }
+    }
+
+    match /hashtags/{tag} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /lists/{listId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+  }
+}
