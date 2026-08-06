@@ -38,4 +38,23 @@ async function optionalAuth(req, res, next) {
   next();
 }
 
-module.exports = { requireAuth, optionalAuth };
+// Verifies the JWT only — does NOT require a Firestore profile to already
+// exist. Use this for routes that run before a profile is created, like
+// /register. (requireAuth above 404s if no profile exists yet, which was
+// blocking new users from ever completing signup.)
+async function verifyToken(req, res, next) {
+  try {
+    const header = req.headers.authorization;
+    if (!header || !header.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Missing authorization token' });
+    }
+    const token = header.split('Bearer ')[1];
+    const decoded = await auth.verifyIdToken(token);
+    req.uid = decoded.uid;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+}
+
+module.exports = { requireAuth, optionalAuth, verifyToken };
