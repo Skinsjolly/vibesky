@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth.jsx';
 import { api } from './lib/api';
 import AuthScreen from './pages/AuthScreen.jsx';
+import CompleteProfile from './pages/CompleteProfile.jsx';
 import Feed from './pages/Feed.jsx';
 import PostDetail from './pages/PostDetail.jsx';
 import Explore from './pages/Explore.jsx';
@@ -20,12 +21,13 @@ import ComposeModal from './components/ComposeModal.jsx';
 import Toast from './components/Toast.jsx';
 
 export default function App() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [composeOpen, setComposeOpen] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) return <AuthScreen />;
+  if (!profile) return <CompleteProfile />;
     const poll = () => api.getUnreadCount().then(d => setUnreadNotifs(d.count)).catch(() => {});
     poll();
     const interval = setInterval(poll, 30000); // poll every 30s
