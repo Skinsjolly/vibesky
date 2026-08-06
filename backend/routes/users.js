@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { db, FieldValue } = require('../services/firebase');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, verifyToken } = require('../middleware/auth');
 
 // GET /api/users/by-handle/:handle — lookup by handle (for /u/:handle routes)
 router.get('/by-handle/:handle', requireAuth, async (req, res) => {
@@ -229,8 +229,10 @@ router.get('/me/lists', requireAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH /api/users/me/lists/:listId — add/remove member
-router.patch('/me/lists/:listId', requireAuth, async (req, res) => {
+// POST /api/users/register — create profile after Firebase signup
+// Uses verifyToken (not requireAuth) since no Firestore profile exists yet
+// at this point — that's exactly what this route creates.
+router.post('/register', verifyToken, async (req, res) => {
   try {
     const { addUid, removeUid } = req.body;
     const ref = db.collection('lists').doc(req.params.listId);
