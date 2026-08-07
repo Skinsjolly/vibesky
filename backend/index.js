@@ -6,6 +6,11 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+// Render (and most PaaS platforms) sit behind a reverse proxy, so trust
+// the X-Forwarded-For header it sets. Without this, express-rate-limit
+// throws a validation error on every request.
+app.set('trust proxy', 1);
+
 // ── SECURITY MIDDLEWARE ──────────────────────────────────────────
 app.use(helmet());
 app.use(cors({
