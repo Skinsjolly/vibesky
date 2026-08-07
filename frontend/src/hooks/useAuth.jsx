@@ -14,24 +14,25 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  let mounted = true;
-  const unsub = onAuthStateChanged(auth, async (fbUser) => {
-    if (!mounted) return;
-    setUser(fbUser);
-    if (fbUser) {
-      try {
-        const p = await api.getUser(fbUser.uid);
-        if (mounted) setProfile(p);
-      } catch (e) {
-        if (mounted) setProfile(null);
+    let mounted = true;
+    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+      if (!mounted) return;
+      setUser(fbUser);
+      if (fbUser) {
+        try {
+          const p = await api.getUser(fbUser.uid);
+          if (mounted) setProfile(p);
+        } catch (e) {
+          if (mounted) setProfile(null);
+        }
+      } else {
+        setProfile(null);
       }
-    } else {
-      setProfile(null);
-    }
-    if (mounted) setLoading(false);
-  });
-  return () => { mounted = false; unsub(); };
-}, []);
+      if (mounted) setLoading(false);
+    });
+    return () => { mounted = false; unsub(); };
+  }, []);
+
   const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
 
   const signup = async (name, handle, email, password) => {
