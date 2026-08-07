@@ -1,9 +1,10 @@
-import { Routes, Route } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth.jsx';
 
 export default function App() {
+  const { loading, user } = useAuth();
   return (
-    <Routes>
-      <Route path="/" element={<div style={{ padding: 40, fontFamily: 'sans-serif' }}>Test 2: with router</div>} />
-    </Routes>
+    <div style={{ padding: 40, fontFamily: 'sans-serif' }}>
+      Test 3: loading={String(loading)}, user={user ? 'yes' : 'no'}
+    </div>
   );
 }
